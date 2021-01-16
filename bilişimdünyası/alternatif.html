@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Langar&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet"> 
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Yusei+Magic&display=swap" rel="stylesheet"> 
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.1/css/all.css" integrity="sha384-vp86vTRFVJgpjF9jiIGPEEqYqlDwgyBgEF109VFjmqGmIY/Y4HV4d3Gp2irVfcrp" crossorigin="anonymous">
+    <link rel="stylesheet" href="styles/stil3.css">
+  <script>
+  function initComparisons() {
+    var x, i;
+    /*find all elements with an "overlay" class:*/
+    x = document.getElementsByClassName("img-comp-overlay");
+    for (i = 0; i < x.length; i++) {
+      /*once for each "overlay" element:
+      pass the "overlay" element as a parameter when executing the compareImages function:*/
+      compareImages(x[i]);
+    }
+    function compareImages(img) {
+      var slider, img, clicked = 0, w, h;
+      /*get the width and height of the img element*/
+      w = img.offsetWidth;
+      h = img.offsetHeight;
+      /*set the width of the img element to 50%:*/
+      img.style.width = (w / 2) + "px";
+      /*create slider:*/
+      slider = document.createElement("DIV");
+      slider.setAttribute("class", "img-comp-slider");
+      /*insert slider*/
+      img.parentElement.insertBefore(slider, img);
+      /*position the slider in the middle:*/
+      slider.style.top = (h / 2) - (slider.offsetHeight / 2) + "px";
+      slider.style.left = (w / 2) - (slider.offsetWidth / 2) + "px";
+      /*execute a function when the mouse button is pressed:*/
+      slider.addEventListener("mousedown", slideReady);
+      /*and another function when the mouse button is released:*/
+      window.addEventListener("mouseup", slideFinish);
+      /*or touched (for touch screens:*/
+      slider.addEventListener("touchstart", slideReady);
+      /*and released (for touch screens:*/
+      window.addEventListener("touchend", slideFinish);
+      function slideReady(e) {
+        /*prevent any other actions that may occur when moving over the image:*/
+        e.preventDefault();
+        /*the slider is now clicked and ready to move:*/
+        clicked = 1;
+        /*execute a function when the slider is moved:*/
+        window.addEventListener("mousemove", slideMove);
+        window.addEventListener("touchmove", slideMove);
+      }
+      function slideFinish() {
+        /*the slider is no longer clicked:*/
+        clicked = 0;
+      }
+      function slideMove(e) {
+        var pos;
+        /*if the slider is no longer clicked, exit this function:*/
+        if (clicked == 0) return false;
+        /*get the cursor's x position:*/
+        pos = getCursorPos(e)
+        /*prevent the slider from being positioned outside the image:*/
+        if (pos < 0) pos = 0;
+        if (pos > w) pos = w;
+        /*execute a function that will resize the overlay image according to the cursor:*/
+        slide(pos);
+      }
+      function getCursorPos(e) {
+        var a, x = 0;
+        e = e || window.event;
+        /*get the x positions of the image:*/
+        a = img.getBoundingClientRect();
+        /*calculate the cursor's x coordinate, relative to the image:*/
+        x = e.pageX - a.left;
+        /*consider any page scrolling:*/
+        x = x - window.pageXOffset;
+        return x;
+      }
+      function slide(x) {
+        /*resize the image:*/
+        img.style.width = x + "px";
+        /*position the slider:*/
+        slider.style.left = img.offsetWidth - (slider.offsetWidth / 2) + "px";
+      }
+    }
+  }
+  </script>
+  <script>
+    function magnify(imgID, zoom) {
+      var img, glass, w, h, bw;
+      img = document.getElementById(imgID);
+      /*create magnifier glass:*/
+      glass = document.createElement("DIV");
+      glass.setAttribute("class", "img-magnifier-glass");
+      /*insert magnifier glass:*/
+      img.parentElement.insertBefore(glass, img);
+      /*set background properties for the magnifier glass:*/
+      glass.style.backgroundImage = "url('" + img.src + "')";
+      glass.style.backgroundRepeat = "no-repeat";
+      glass.style.backgroundSize = (img.width * zoom) + "px " + (img.height * zoom) + "px";
+      bw = 3;
+      w = glass.offsetWidth / 2;
+      h = glass.offsetHeight / 2;
+      /*execute a function when someone moves the magnifier glass over the image:*/
+      glass.addEventListener("mousemove", moveMagnifier);
+      img.addEventListener("mousemove", moveMagnifier);
+      /*and also for touch screens:*/
+      glass.addEventListener("touchmove", moveMagnifier);
+      img.addEventListener("touchmove", moveMagnifier);
+      function moveMagnifier(e) {
+        var pos, x, y;
+        /*prevent any other actions that may occur when moving over the image*/
+        e.preventDefault();
+        /*get the cursor's x and y positions:*/
+        pos = getCursorPos(e);
+        x = pos.x;
+        y = pos.y;
+        /*prevent the magnifier glass from being positioned outside the image:*/
+        if (x > img.width - (w / zoom)) {x = img.width - (w / zoom);}
+        if (x < w / zoom) {x = w / zoom;}
+        if (y > img.height - (h / zoom)) {y = img.height - (h / zoom);}
+        if (y < h / zoom) {y = h / zoom;}
+        /*set the position of the magnifier glass:*/
+        glass.style.left = (x - w) + "px";
+        glass.style.top = (y - h) + "px";
+        /*display what the magnifier glass "sees":*/
+        glass.style.backgroundPosition = "-" + ((x * zoom) - w + bw) + "px -" + ((y * zoom) - h + bw) + "px";
+      }
+      function getCursorPos(e) {
+        var a, x = 0, y = 0;
+        e = e || window.event;
+        /*get the x and y positions of the image:*/
+        a = img.getBoundingClientRect();
+        /*calculate the cursor's x and y coordinates, relative to the image:*/
+        x = e.pageX - a.left;
+        y = e.pageY - a.top;
+        /*consider any page scrolling:*/
+        x = x - window.pageXOffset;
+        y = y - window.pageYOffset;
+        return {x : x, y : y};
+      }
+    }
+    </script>
+</head>
+<body>
+    <div id="container">
+        <div class="header">
+            <ul class="ustMenu">
+                <li><a href="index.html" class="anasayfa">anasayfa</a></li>
+                <li><a href="#">kurumsal</a></li>
+                <li><a href="#">ürünler</a></li>
+                <li><a href="#">İLETİŞİM</a></li>
+            </ul>
+        </div>
+        <div class="slider">
+            
+<div class="slideshow-container">
+
+    <div class="mySlides fade">
+      <img src="images/oyuncu bilgisayarı.png" style="width:100%;">
+    </div>
+    
+    <div class="mySlides fade">
+      <img src="images/mobilecms_640_x.webp" style="width:100%">
+    </div>
+    <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+    <a class="next" onclick="plusSlides(1)">&#10095;</a>
+    
+    </div>
+    <br>
+    
+    <div style="text-align:center">
+      <span class="dot" onclick="currentSlide(1)"></span> 
+      <span class="dot" onclick="currentSlide(2)"></span> 
+      <span class="dot" onclick="currentSlide(3)"></span> 
+    </div>
+        </div>
+        <div class="article">
+          <h5>Kalite Yönetim Sistemi ve Standartları</h5>
+          <h1>BİLGİSAYAR</h1>
+          <p>Bilgisayar Alm. Computer (m). Fr. Ordinateur (m). İng. Computer. çok sayıda aritmetiksel veya mantıksal işlemlerden oluşan bir işi, önceden verilmiş bir programa göre yapıp sonuçlandıran elektronik araç, elektronik beyin. Kullanıcıdan aldığı verilerle mantıksal ve aritmetiksel işlemleri yapan; yaptığı işlemlerin sonucunu saklayabilen; sakladığı bilgilere istenildiğinde ulaşılabilen elektronik bir makinedir. Halledilmesi gereken konu ile ilgili bilgi ve onun nasıl işlem göreceği bilgisayara iletildiğinde, bir çok insanın senelerce çalışması ile bitiremeyecekleri işi bir kaç saniyede yapar.</p>
+          <h5>iç ve dış donanım özellikleri</h5>
+          <p>Bilgisayarın sistem biriminin yani kasasının iç tarafında kalan parçalara İç Donanım olarak tanımlanırken dışarıda yani gözle görülebilir parçalara Dış Donanım denir. İç donanım parçaları şunlardır; Anakart (Motherboard), İşlemci (CPU), RAM, Grafik Kartı, Sabit Disk, Ses Kartı, Ethernet, Modem, TV Kartı yer almaktadır.</p>
+          <p>Bilgisayarı oluşturan elektronik parçaların her birine verilen isimdir. Bilgisayarın gözle görülebilen ve elle tutulabilen kısımlarına dış donanım denir. Donanımlar, kasanın dışında olabileceği gibi içerisinde de yer alabilir. Kasa dışında kalan donanımlara dış donanım denir.4 Tem 2018</p>
+          <a href="#" class="buton">HAKKIMIZDA</a>
+      </div>
+      <div class="gallery">
+
+        <div class="img-magnifier-container">
+          <img id="myimage" src="./images/özellikler.jpg" width="500" height="400">
+        </div>
+      </div>
+        <div class="eleman1">
+          <div class="img-comp-container">
+            <div class="img-comp-img">
+              <img src="./images/ekran kartı.jpg" width="250" height="200">
+            </div>
+              <div class="img-comp-img img-comp-overlay">
+              <img src="./images/ram.jpg" width="250" height="200">
+            </div>
+          </div>
+          </div>
+        <div class="eleman2">
+          <div class="img-comp-container">
+            <div class="img-comp-img">
+              <img src="./images/mause.jpg" width="250" height="200">
+            </div>
+            <div class="img-comp-img img-comp-overlay">
+              <img src="./images/klavye.jpg" width="250" height="200">
+            </div>
+          </div>
+        </div>
+        <div class="eleman3">  <div class="img-comp-container">
+          <div class="img-comp-img">
+            <img src="./images/sıvı sogutma.jpg" width="250" height="200">
+          </div>
+          <div class="img-comp-img img-comp-overlay">
+            <img src="./images/ana kart.jpg" width="250" height="200">
+          </div>
+        </div>
+      </div>
+        <div class="eleman4">
+          <div class="img-comp-container">
+            <div class="img-comp-img">
+              <img src="./images/işlemci.png" width="250" height="200">
+            </div>
+            <div class="img-comp-img img-comp-overlay">
+              <img src="./images/guç kaynagı.jpg" width="250" height="200">
+            </div>
+          </div>
+        </div>
+        <div class="eleman5">
+          <div class="img-comp-container">
+            <div class="img-comp-img">
+              <img src="./images/kasa.jpg" width="250" height="200">
+            </div>
+            <div class="img-comp-img img-comp-overlay">
+              <img src="./images/MONİTOR.jpg" width="250" height="200">
+            </div>
+          </div>
+        </div>
+        <div class="footer">
+            <ul class="sosyalMedya">
+                <li><a href="www.facebook.com" class="facebook"><i class="fab fa-facebook-f fa-lg"></i></a></li>
+                <li><a href="wwww.twitter.com" class="twitter"><i class="fab fa-twitter fa-lg"></i></a></li>
+                <li><a href="www.instagram.com" class="instagram"><i class="fab fa-instagram fa-lg"></i></a></li>
+                <li><a href="www.youtube.com" class="youtube"><i class="fab fa-youtube fa-lg"></i></a></li>
+                
+            </ul>
+            <h3><a href="#" class="bilisim">@11-I Bilişim</a></h3>
+
+        </div>
+    </div>
+
+    </div>
+
+        </div>
+    </div>
+    <script>
+        var slideIndex = 1;
+        showSlides(slideIndex);
+        
+        function plusSlides(n) {
+          showSlides(slideIndex += n);
+        }
+        
+        function currentSlide(n) {
+          showSlides(slideIndex = n);
+        }
+        
+        function showSlides(n) {
+          var i;
+          var slides = document.getElementsByClassName("mySlides");
+          var dots = document.getElementsByClassName("dot");
+          if (n > slides.length) {slideIndex = 1}    
+          if (n < 1) {slideIndex = slides.length}
+          for (i = 0; i < slides.length; i++) {
+              slides[i].style.display = "none";  
+          }
+          for (i = 0; i < dots.length; i++) {
+              dots[i].className = dots[i].className.replace(" active", "");
+          }
+          slides[slideIndex-1].style.display = "block";  
+          dots[slideIndex-1].className += " active";
+        }
+        </script>
+        
+<script>
+  /*Execute a function that will execute an image compare function for each element with the img-comp-overlay class:*/
+  initComparisons();
+  </script>
+
+  <script>
+    /* Initiate Magnify Function
+    with the id of the image, and the strength of the magnifier glass:*/
+    magnify("myimage", 3);
+    </script>
+    
+           
+</body>
+</html>
